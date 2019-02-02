@@ -1,0 +1,7 @@
+test
+__pycache__
+.idea
+*.h5
+*.hdf5
+result/
+*.npy
