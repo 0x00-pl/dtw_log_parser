@@ -1,5 +1,8 @@
 def get_tag_from_filename(filename):
-    return filename[:-4].split('\\')[-1]
+    try:
+        return int(filename.split('/')[1].split('\\')[0])
+    except:
+        return float('NaN')
 
 
 def parse_line(line: str):
