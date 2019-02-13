@@ -4,4 +4,6 @@ __pycache__
 *.h5
 *.hdf5
 result/
+dataset/
+kanzhitongxue/
 *.npy
