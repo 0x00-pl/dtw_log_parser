@@ -1,6 +1,7 @@
 import itertools
 import os
 import random
+from multiprocessing import Pool
 
 import dtw
 import numpy as np
@@ -11,7 +12,6 @@ import webrtcvad
 from pydub import effects
 
 import roc
-from multiprocessing import Pool
 
 
 def read_all_features(f):
@@ -47,6 +47,11 @@ def read_all_features(f):
 
 
 def read_file(filename):
+    with open(filename, 'r') as fi:
+        return read_all_features(fi)
+
+
+def read_file_pos_neg(filename):
     with open(filename, 'r') as fi:
         return read_all_features(fi)
 
@@ -109,7 +114,7 @@ def cal_all_dtw_pos_neg_multiprocessing(pos_features_list, neg_features_list, li
         for feature2 in neg_features_list:
             tasks.append([feature1, feature2, 1, 2])
 
-    if limit is not None:
+    if limit is not None and len(tasks) > limit:
         tasks = random.choices(tasks, k=limit)
 
     with Pool(processes=8) as pool:
@@ -174,7 +179,7 @@ def dataset_read_all(root_path='kanzhitongxue'):
 def dtw_local_pos_neg_main():
     pos_features_list = [i[1] for i in dataset_read_all('kanzhitongxue/pos')]
     neg_features_list = [i[1] for i in dataset_read_all('kanzhitongxue/other_text')]
-    dist_tag_tag_list = cal_all_dtw_pos_neg_multiprocessing(pos_features_list, neg_features_list, limit=10000)
+    dist_tag_tag_list = cal_all_dtw_pos_neg_multiprocessing(pos_features_list, neg_features_list)
     dist_trueneg_falsepos = roc.roc_from_dist_tag_tag(dist_tag_tag_list, 1000)
     roc.print_roc(dist_trueneg_falsepos, 'roc_dtw')
 
@@ -182,6 +187,15 @@ def dtw_local_pos_neg_main():
 def dtw_local_main():
     name_features_list = dataset_read_all('dataset')
     dist_tag_tag_list = cal_all_dtw_multiprocessing(name_features_list, limit=10000)
+    dist_trueneg_falsepos = roc.roc_from_dist_tag_tag(dist_tag_tag_list, 1000)
+    roc.print_roc(dist_trueneg_falsepos, 'roc_dtw')
+
+
+def pos_neg_main():
+    name_features_list = read_file_pos_neg('result/dump_feature_pn.txt')
+    pos_features_list = [i[1] for i in name_features_list if get_tag_from_filename(i[0]) == 1]
+    neg_features_list = [i[1] for i in name_features_list if get_tag_from_filename(i[0]) == 2]
+    dist_tag_tag_list = cal_all_dtw_pos_neg_multiprocessing(pos_features_list, neg_features_list)
     dist_trueneg_falsepos = roc.roc_from_dist_tag_tag(dist_tag_tag_list, 1000)
     roc.print_roc(dist_trueneg_falsepos, 'roc_dtw')
 
@@ -194,4 +208,4 @@ def main():
 
 
 if __name__ == '__main__':
-    dtw_local_pos_neg_main()
+    pos_neg_main()
