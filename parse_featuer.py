@@ -101,7 +101,7 @@ def cal_all_dtw_multiprocessing(name_features_list, limit=None):
         tasks = random.choices(tasks, k=limit)
 
     with Pool(processes=8) as pool:
-        return list(tqdm.tqdm(pool.imap(cal_all_dtw_multiprocessing_step, tasks, chunksize=10), total=len(tasks)))
+        return list(tqdm.tqdm(pool.imap(cal_all_dtw_multiprocessing_step, tasks), total=len(tasks)))
 
 
 def cal_all_dtw_pos_neg_multiprocessing(pos_features_list, neg_features_list, limit=None):
@@ -117,7 +117,7 @@ def cal_all_dtw_pos_neg_multiprocessing(pos_features_list, neg_features_list, li
     if limit is not None and len(tasks) > limit:
         tasks = random.choices(tasks, k=limit)
 
-    with Pool(processes=8) as pool:
+    with Pool() as pool:
         return list(tqdm.tqdm(pool.imap(cal_all_dtw_multiprocessing_step, tasks, chunksize=10), total=len(tasks)))
 
 
